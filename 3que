@@ -1,0 +1,35 @@
+//Create two threads, In one thread perform addition of two numbers and in second thread form the subtraction of two number
+
+#include <stdio.h>
+#include <pthread.h>
+
+int a = 10, b = 5; // Global variables for the two numbers
+
+void *add_thread(void *arg)
+{
+    int sum = a + b;
+    printf("Sum of %d and %d is %d\n", a, b, sum);
+    return NULL;
+}
+
+void *sub_thread(void *arg)
+{
+    int diff = a - b;
+    printf("Difference of %d and %d is %d\n", a, b, diff);
+    return NULL;
+}
+
+int main()
+{
+    pthread_t thread1, thread2;
+
+    // Create two threads
+    pthread_create(&thread1, NULL, add_thread, NULL);
+    pthread_create(&thread2, NULL, sub_thread, NULL);
+
+    // Wait for the threads to finish
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
+    return 0;
+}
