@@ -1,0 +1,27 @@
+//Write a program to simulate the race condition in which the shared variable value is 30
+
+#include <stdio.h>
+#include <pthread.h>
+
+int shared_var = 30;
+
+void *thread_function(void *arg)
+{
+    int i;
+    for (i = 0; i < 1000000; i++)
+    {
+        shared_var++;
+    }
+    return NULL;
+}
+
+int main()
+{
+    pthread_t thread1, thread2;
+    pthread_create(&thread1, NULL, thread_function, NULL);
+    pthread_create(&thread2, NULL, thread_function, NULL);
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+    printf("The value of shared_var is: %d\n", shared_var);
+    return 0;
+}
