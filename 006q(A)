@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define BUFSIZE 512
+
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        printf("Usage: %s <filename>\n", argv[0]);
+        return 1;
+    }
+
+    // Open the input file
+    int infd = open(argv[1], O_RDONLY);
+    if (infd == -1) {
+        perror("open");
+        return 1;
+    }
+
+    // Open the output files
+    int outfd1 = open("out1.txt", O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (outfd1 == -1) {
+        perror("open");
+        close(infd);
+        return 1;
+    }
+
+    int outfd2 = open("out2.txt", O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (outfd2 == -1) {
+        perror("open");
+        close(infd);
+        close(outfd1);
+        return 1;
+    }
+
+    // Get the size of the input file
+    off_t filesize = lseek(infd, 0, SEEK_END);
+    if (filesize == (off_t)-1) {
+        perror("lseek");
+        close(infd);
+        close(outfd1);
+        close(outfd2);
+        return 1;
+    }
+
+    // Seek to the beginning of the input file
+    if (lseek(infd, 0, SEEK_SET) == (off_t)-1) {
+        perror("lseek");
+        close(infd);
+        close(outfd1);
+        close(outfd2);
+        return 1;
+    }
+
+    // Copy the contents of the input file to the output files
+    char buffer[BUFSIZE];
+    ssize_t nread;
+    off_t remaining = filesize;
+    while (remaining > 0 && (nread = read(infd, buffer, BUFSIZE)) != 0) {
+        if (nread == -1) {
+            perror("read");
+            close(infd);
+            close(outfd1);
+            close(outfd2);
+            return 1;
+        }
+
+        // Write the data to the first output file
+        ssize_t nwritten1 = write(outfd1, buffer, nread / 2);
+        if (nwritten1 == -1) {
+            perror("write");
+            close(infd);
+            close(outfd1);
+            close(outfd2);
+            return 1;
+        }
+
+        // Write the data to the second output file
+        ssize_t nwritten2 = write(outfd2, buffer + nread / 2, nread / 2);
+        if (nwritten2 == -1) {
+            perror("write");
+            close(infd);
+            close(outfd1);
+            close(outfd2);
+            return 1;
+        }
+
+        remaining -= nread;
+    }
+
+    // Close the file descriptors
+    close(infd);
+    close(outfd1);
+    close(outfd2);
+
+    return 0;
+}
