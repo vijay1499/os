@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+int main() {
+    FILE *pipe;
+    char command[100];
+    char message[100];
+
+    printf("Enter a message: ");
+    scanf("%s", message);
+
+    sprintf(command, "echo %s", message);
+    pipe = popen(command, "r");
+
+    if (pipe == NULL) {
+        printf("Error opening pipe.\n");
+        return 1;
+    }
+
+    printf("Output of the pipe:\n");
+    while (fgets(command, 100, pipe)) {
+        printf("%s", command);
+    }
+
+    pclose(pipe);
+    return 0;
+}
