@@ -1,0 +1,100 @@
+//Write a C program to create two processes that implement a 
+//producer-consumer model using semaphores to synchronize access to the shared buffer.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+
+#define SEM_KEY 1234
+#define SHM_KEY 5678
+#define BUFFER_SIZE 10
+
+union semun {
+    int val;
+    struct semid_ds *buf;
+    unsigned short *array;
+};
+
+int main() {
+    // create a semaphore set with three semaphores
+    int semid = semget(SEM_KEY, 3, IPC_CREAT | 0666);
+    if (semid == -1) {
+        perror("semget");
+        exit(1);
+    }
+
+    // initialize the semaphores to their initial values
+    union semun arg;
+    arg.val = 0;
+    if (semctl(semid, 0, SETVAL, arg) == -1) {
+        perror("semctl");
+        exit(1);
+    }
+    arg.val = BUFFER_SIZE;
+    if (semctl(semid, 1, SETVAL, arg) == -1) {
+        perror("semctl");
+        exit(1);
+    }
+    arg.val = 1;
+    if (semctl(semid, 2, SETVAL, arg) == -1) {
+        perror("semctl");
+        exit(1);
+    }
+
+    // create a shared memory segment for the buffer
+    int shmid = shmget(SHM_KEY, BUFFER_SIZE * sizeof(int), IPC_CREAT | 0666);
+    if (shmid == -1) {
+        perror("shmget");
+        exit(1);
+    }
+
+    // initialize the buffer to zeros
+    int *buffer = (int*) shmat(shmid, NULL, 0);
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        buffer[i] = 0;
+    }
+    shmdt(buffer);
+
+    // create a child process
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork");
+        exit(1);
+    } else if (pid == 0) {
+        // producer process
+        for (int i = 0; i < 1000000; i++) {
+            // wait for space in the buffer
+            struct sembuf sops = {1, -1, 0};
+            semop(semid, &sops, 1);
+
+            // wait for exclusive access to the buffer
+            sops.sem_num = 2;
+            semop(semid, &sops, 1);
+
+            // add an item to the buffer
+            int *buffer = (int*) shmat(shmid, NULL, 0);
+            for (int j = 0; j < BUFFER_SIZE; j++) {
+                if (buffer[j] == 0) {
+                    buffer[j] = i;
+                    break;
+                }
+            }
+            shmdt(buffer);
+
+            // release exclusive access to the buffer
+            sops.sem_op = 1;
+            semop(semid, &sops, 1);
+
+            // signal that an item is available in the buffer
+            sops.sem_num = 0;
+            semop(semid, &sops, 1);
+        }
+    } else {
+        // consumer process
+        for (int i = 0; i < 1000000; i++) {
+            // wait for an item in the buffer
+            struct sembuf sops = {0, -1, 0};
+            semop

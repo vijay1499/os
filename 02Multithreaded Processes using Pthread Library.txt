@@ -1,0 +1,27 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <time.h>
+
+void* print_random_number(void* arg) {
+    srand(time(NULL)); // seed the random number generator
+    int random_number = rand() % 100; // generate a random number between 0 and 99
+    printf("Random number: %d\n", random_number);
+    return NULL;
+}
+
+int main() {
+    pthread_t thread1, thread2;
+
+    // create first thread
+    pthread_create(&thread1, NULL, print_random_number, NULL);
+
+    // create second thread
+    pthread_create(&thread2, NULL, print_random_number, NULL);
+
+    // wait for threads to finish
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
+    return 0;
+}

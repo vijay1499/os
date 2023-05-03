@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <pthread.h>
+
+int shared_variable = 0;
+pthread_mutex_t mutex;
+
+void* increment_shared_variable(void* arg) {
+    for (int i = 0; i < 1000000; i++) {
+        pthread_mutex_lock(&mutex);
+        shared_variable++;
+        pthread_mutex_unlock(&mutex);
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t thread1, thread2;
+
+    // initialize the mutex
+    pthread_mutex_init(&mutex, NULL);
+
+    // create first thread
+    pthread_create(&thread1, NULL, increment_shared_variable, NULL);
+
+    // create second thread
+    pthread_create(&thread2, NULL, increment_shared_variable, NULL);
+
+    // wait for threads to finish
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
+    // destroy the mutex
+    pthread_mutex_destroy(&mutex);
+
+    printf("Shared variable: %d\n", shared_variable);
+
+    return 0;
+}
