@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+#define ARRAY_SIZE 5
+
+int array[ARRAY_SIZE] = {2, 4, 6, 8, 10};
+int sum = 0, product = 1;
+
+void *calculateSum(void *arg)
+{
+    for(int i = 0; i < ARRAY_SIZE; i++)
+    {
+        sum += array[i];
+    }
+    printf("Sum of array elements is %d\n", sum);
+    pthread_exit(NULL);
+}
+
+void *calculateProduct(void *arg)
+{
+    for(int i = 0; i < ARRAY_SIZE; i++)
+    {
+        product *= array[i];
+    }
+    printf("Product of array elements is %d\n", product);
+    pthread_exit(NULL);
+}
+
+int main()
+{
+    pthread_t thread1, thread2;
+
+    pthread_create(&thread1, NULL, calculateSum, NULL);
+    pthread_create(&thread2, NULL, calculateProduct, NULL);
+
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
+    return 0;
+}
