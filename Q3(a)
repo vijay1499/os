@@ -1,0 +1,20 @@
+//Here's a shell script program that creates a directory, generates 100 text files, and deletes files starting with "Vijay":
+
+
+#!/bin/bash
+
+# Prompt user for directory name
+read -p "Enter directory name: " dirname
+
+# Create directory
+mkdir $dirname
+
+# Generate 100 text files
+for ((i=1; i<=100; i++))
+do
+  touch $dirname/textfile$i.txt
+done
+
+# Delete files starting with "Vijay"
+rm $dirname/Vijay*
+
