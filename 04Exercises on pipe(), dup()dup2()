@@ -1,0 +1,54 @@
+//Write a C program that creates a file called "file1.txt" and writes some text to it. Then, use the dup2 system call to create a duplicate file 
+//descriptor for the file, and close the original file descriptor. Finally, use the duplicate file descriptor to read the text from the file and 
+//write it to the standard output.
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+int main() {
+    // Open the file for writing
+    int fd = open("file1.txt", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+    if (fd == -1) {
+        perror("open");
+        exit(1);
+    }
+
+    // Write some text to the file
+    const char* text = "Hello, world!\n";
+    if (write(fd, text, strlen(text)) == -1) {
+        perror("write");
+        exit(1);
+    }
+
+    // Create a duplicate file descriptor and close the original
+    int fd_dup = dup2(fd, STDOUT_FILENO);
+    if (close(fd) == -1) {
+        perror("close");
+        exit(1);
+    }
+
+    // Read from the duplicate file descriptor and write to stdout
+    char buf[1024];
+    ssize_t nread;
+    while ((nread = read(fd_dup, buf, sizeof(buf))) > 0) {
+        if (write(STDOUT_FILENO, buf, nread) == -1) {
+            perror("write");
+            exit(1);
+        }
+    }
+    if (nread == -1) {
+        perror("read");
+        exit(1);
+    }
+
+    // Close the duplicate file descriptor
+    if (close(fd_dup) == -1) {
+        perror("close");
+        exit(1);
+    }
+
+    return 0;
+}
