@@ -1,0 +1,9 @@
+//Write a program on shell script for calculating the multiplication table of 50
+
+#!/bin/bash
+
+for i in {1..10}
+do
+    result=$((50 * i))
+    echo "50 x $i = $result"
+done
