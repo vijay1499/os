@@ -1,20 +1,43 @@
 WAP using system calls which will read from 10th character to 20th character from a file opened in read only mode
 
 
-import os
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
 
-# Open the file in read-only mode
-file_path = "example.txt"
-file_descriptor = os.open(file_path, os.O_RDONLY)
+int main() {
+    int fd, num_bytes;
+    char buffer[11];
 
-# Seek to the 10th character
-os.lseek(file_descriptor, 9, os.SEEK_SET)
+    // Open the file in read-only mode
+    fd = open("example.txt", O_RDONLY);
+    if (fd == -1) {
+        perror("open");
+        return 1;
+    }
 
-# Read the next 11 characters (10th to 20th)
-data = os.read(file_descriptor, 11)
+    // Read 10 bytes from the file starting at the 10th character
+    if (lseek(fd, 9, SEEK_SET) == -1) {
+        perror("lseek");
+        return 1;
+    }
 
-# Close the file descriptor
-os.close(file_descriptor)
+    num_bytes = read(fd, buffer, 10);
+    if (num_bytes == -1) {
+        perror("read");
+        return 1;
+    }
 
-# Print the data read from the file
-print(f"Data from 10th to 20th character: {data.decode()}")
+    // Null-terminate the buffer to print it as a string
+    buffer[num_bytes] = '\0';
+
+    printf("Characters 10-20: %s\n", buffer);
+
+    // Close the file
+    if (close(fd) == -1) {
+        perror("close");
+        return 1;
+    }
+
+    return 0;
+}
