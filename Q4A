@@ -1,40 +1,54 @@
 WAP to create two threads. One will print the table of given number and the other thread will find whether a number entered by the user is prime or not.
 
 
-import threading
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
 
-# Define a function to print the table of a given number
-def print_table(num):
-    print(f"Table of {num}:")
-    for i in range(1, 11):
-        print(f"{num} x {i} = {num*i}")
+void *print_table(void *arg);
+void *check_prime(void *arg);
 
-# Define a function to check if a number is prime or not
-def check_prime(num):
-    is_prime = True
-    if num <= 1:
-        is_prime = False
-    else:
-        for i in range(2, num):
-            if num % i == 0:
-                is_prime = False
-                break
-    if is_prime:
-        print(f"{num} is a prime number.")
-    else:
-        print(f"{num} is not a prime number.")
+int main() {
+    pthread_t tid1, tid2;
+    int num;
+    
+    // Get the number from the user
+    printf("Enter a number: ");
+    scanf("%d", &num);
+    
+    // Create the two threads
+    pthread_create(&tid1, NULL, print_table, (void *)&num);
+    pthread_create(&tid2, NULL, check_prime, (void *)&num);
+    
+    // Wait for the two threads to finish
+    pthread_join(tid1, NULL);
+    pthread_join(tid2, NULL);
+    
+    return 0;
+}
 
-# Take input from the user
-num = int(input("Enter a number: "))
+void *print_table(void *arg) {
+    int num = *(int *)arg;
+    printf("Table of %d:\n", num);
+    for (int i = 1; i <= 10; i++) {
+        printf("%d x %d = %d\n", num, i, num * i);
+    }
+    pthread_exit(NULL);
+}
 
-# Create the two threads
-t1 = threading.Thread(target=print_table, args=(num,))
-t2 = threading.Thread(target=check_prime, args=(num,))
-
-# Start both threads
-t1.start()
-t2.start()
-
-# Wait for both threads to finish
-t1.join()
-t2.join()
+void *check_prime(void *arg) {
+    int num = *(int *)arg;
+    int is_prime = 1;
+    for (int i = 2; i < num; i++) {
+        if (num % i == 0) {
+            is_prime = 0;
+            break;
+        }
+    }
+    if (is_prime) {
+        printf("%d is a prime number\n", num);
+    } else {
+        printf("%d is not a prime number\n", num);
+    }
+    pthread_exit(NULL);
+}
