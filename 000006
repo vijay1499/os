@@ -1,0 +1,66 @@
+WAP to provide solution for Reader Writer problem using semaphores and treads
+
+
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+#define N_READERS 5
+#define N_WRITERS 2
+
+pthread_t reader_threads[N_READERS], writer_threads[N_WRITERS];
+sem_t read_mutex, write_mutex;
+int reader_count = 0, writer_count = 0, data = 0;
+
+void *reader(void *arg) {
+    while (1) {
+        sem_wait(&read_mutex);
+        reader_count++;
+        if (reader_count == 1) {
+            sem_wait(&write_mutex);
+        }
+        sem_post(&read_mutex);
+        printf("Reader %ld reads data: %d\n", (long)arg, data);
+        sem_wait(&read_mutex);
+        reader_count--;
+        if (reader_count == 0) {
+            sem_post(&write_mutex);
+        }
+        sem_post(&read_mutex);
+        sleep(1);
+    }
+    return NULL;
+}
+
+void *writer(void *arg) {
+    while (1) {
+        sem_wait(&write_mutex);
+        writer_count++;
+        printf("Writer %ld writes data: %d\n", (long)arg, ++data);
+        writer_count--;
+        sem_post(&write_mutex);
+        sleep(1);
+    }
+    return NULL;
+}
+
+int main() {
+    int i;
+    sem_init(&read_mutex, 0, 1);
+    sem_init(&write_mutex, 0, 1);
+    for (i = 0; i < N_READERS; i++) {
+        pthread_create(&reader_threads[i], NULL, reader, (void *)i);
+    }
+    for (i = 0; i < N_WRITERS; i++) {
+        pthread_create(&writer_threads[i], NULL, writer, (void *)i);
+    }
+    for (i = 0; i < N_READERS; i++) {
+        pthread_join(reader_threads[i], NULL);
+    }
+    for (i = 0; i < N_WRITERS; i++) {
+        pthread_join(writer_threads[i], NULL);
+    }
+    sem_destroy(&read_mutex);
+    sem_destroy(&write_mutex);
+    return 0;
+}
