@@ -1,0 +1,37 @@
+ Write a program in shell programming to print grade wise result of a student
+ 
+ 
+ #!/bin/bash
+
+# Take input of the student's marks in 5 subjects
+echo "Enter the marks of the student in 5 subjects (out of 100):"
+read -p "Subject 1: " s1
+read -p "Subject 2: " s2
+read -p "Subject 3: " s3
+read -p "Subject 4: " s4
+read -p "Subject 5: " s5
+
+# Calculate the total marks and percentage
+total_marks=$((s1 + s2 + s3 + s4 + s5))
+percentage=$((total_marks / 5))
+
+# Print out the grade-wise result based on the percentage
+if ((percentage >= 90)); then
+    echo "Grade: A"
+    echo "Result: Pass"
+elif ((percentage >= 80)); then
+    echo "Grade: B"
+    echo "Result: Pass"
+elif ((percentage >= 70)); then
+    echo "Grade: C"
+    echo "Result: Pass"
+elif ((percentage >= 60)); then
+    echo "Grade: D"
+    echo "Result: Pass"
+elif ((percentage >= 40)); then
+    echo "Grade: E"
+    echo "Result: Pass"
+else
+    echo "Grade: F"
+    echo "Result: Fail"
+fi
