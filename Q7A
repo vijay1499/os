@@ -1,39 +1,61 @@
 WAP to create two threads. One will print the numbers from 50 to 1 and the other thread will find whether a number entered by the user is prime or not. 
 
 
-import threading
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
 
-# Define a function to print the numbers from 50 to 1
-def print_numbers():
-    for i in range(50, 0, -1):
-        print(i)
+// Function to print numbers from 50 to 1
+void* printNumbers(void* arg) {
+    for (int i = 50; i >= 1; i--) {
+        printf("%d\n", i);
+    }
+    pthread_exit(NULL);
+}
 
-# Define a function to check whether a number is prime or not
-def is_prime(n):
-    if n <= 1:
-        return False
-    for i in range(2, int(n ** 0.5) + 1):
-        if n % i == 0:
-            return False
-    return True
+// Function to check if a number is prime or not
+void* isPrime(void* arg) {
+    int num = *(int*)arg;
+    int is_prime = 1;
 
-# Get input from the user
-num = int(input("Enter a number: "))
+    for (int i = 2; i <= num / 2; i++) {
+        if (num % i == 0) {
+            is_prime = 0;
+            break;
+        }
+    }
 
-# Create two threads
-t1 = threading.Thread(target=print_numbers)
-t2 = threading.Thread(target=is_prime, args=(num,))
+    if (is_prime) {
+        printf("%d is a prime number\n", num);
+    } else {
+        printf("%d is not a prime number\n", num);
+    }
 
-# Start the threads
-t1.start()
-t2.start()
+    pthread_exit(NULL);
+}
 
-# Wait for both threads to finish
-t1.join()
-t2.join()
+int main() {
+    pthread_t thread1, thread2;
+    int num;
 
-# Print the result of the is_prime function
-if t2.result:
-    print(f"{num} is a prime number.")
-else:
-    print(f"{num} is not a prime number.")
+    // Create the first thread to print numbers
+    if (pthread_create(&thread1, NULL, printNumbers, NULL)) {
+        perror("pthread_create");
+        exit(EXIT_FAILURE);
+    }
+
+    // Prompt the user for a number and create the second thread to check if it's prime
+    printf("Enter a number: ");
+    scanf("%d", &num);
+
+    if (pthread_create(&thread2, NULL, isPrime, &num)) {
+        perror("pthread_create");
+        exit(EXIT_FAILURE);
+    }
+
+    // Wait for both threads to finish
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
+    return 0;
+}
