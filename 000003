@@ -1,0 +1,15 @@
+Write a shell script program to find sum of first ten integers, their average also
+
+#!/bin/bash
+
+sum=0
+for i in {1..10}
+do
+    sum=$((sum+i))
+done
+
+avg=$(echo "scale=2; $sum/10" | bc)
+
+echo "Sum of first ten integers is: $sum"
+echo "Average of first ten integers is: $avg"
+
