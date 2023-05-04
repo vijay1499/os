@@ -1,0 +1,40 @@
+WAP to create two threads. One will print the table of given number and the other thread will find whether a number entered by the user is prime or not.
+
+
+import threading
+
+# Define a function to print the table of a given number
+def print_table(num):
+    print(f"Table of {num}:")
+    for i in range(1, 11):
+        print(f"{num} x {i} = {num*i}")
+
+# Define a function to check if a number is prime or not
+def check_prime(num):
+    is_prime = True
+    if num <= 1:
+        is_prime = False
+    else:
+        for i in range(2, num):
+            if num % i == 0:
+                is_prime = False
+                break
+    if is_prime:
+        print(f"{num} is a prime number.")
+    else:
+        print(f"{num} is not a prime number.")
+
+# Take input from the user
+num = int(input("Enter a number: "))
+
+# Create the two threads
+t1 = threading.Thread(target=print_table, args=(num,))
+t2 = threading.Thread(target=check_prime, args=(num,))
+
+# Start both threads
+t1.start()
+t2.start()
+
+# Wait for both threads to finish
+t1.join()
+t2.join()
