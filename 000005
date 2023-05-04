@@ -1,0 +1,52 @@
+WAP to create a file with name READ2.txt and enter some data in this file system call only then read last 1/3 content of the file using system cals, find the size of file using Iseek()
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define MAX_SIZE 1024
+
+int main() {
+    int fd;
+    off_t offset, fileSize;
+
+    // create the file
+    fd = open("READ2.txt", O_CREAT | O_RDWR, 0644);
+    if (fd == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+
+    // write some data to the file
+    char data[] = "This is some sample data.";
+    write(fd, data, sizeof(data));
+
+    // get the file size
+    fileSize = lseek(fd, 0, SEEK_END);
+
+    // read the last 1/3 of the file
+    offset = lseek(fd, -fileSize/3, SEEK_END);
+    char buf[MAX_SIZE];
+    ssize_t numRead;
+    while ((numRead = read(fd, buf, MAX_SIZE)) > 0) {
+        write(STDOUT_FILENO, buf, numRead);
+    }
+    if (numRead == -1) {
+        perror("read");
+        exit(EXIT_FAILURE);
+    }
+
+    // print the file size
+    printf("The size of the file is %ld bytes.\n", fileSize);
+
+    // close the file
+    if (close(fd) == -1) {
+        perror("close");
+        exit(EXIT_FAILURE);
+    }
+
+    return 0;
+}
