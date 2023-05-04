@@ -1,0 +1,27 @@
+wap a program using system calls to copy the contents of a file and create four files each containing 1/4 contents of the file.
+
+import os
+
+# Open the input file and read its contents
+with open("input_file.txt", "r") as input_file:
+    contents = input_file.read()
+
+# Calculate the size of each chunk
+file_size = len(contents)
+chunk_size = file_size // 4
+
+# Create four output files and write the appropriate chunks to each file
+for i in range(4):
+    # Determine the start and end indices of the chunk
+    start_index = i * chunk_size
+    end_index = start_index + chunk_size
+    
+    # Create the output file name with the format "output_i.txt"
+    output_file_name = f"output_{i}.txt"
+    
+    # Open the output file and write the chunk of data to it
+    with open(output_file_name, "w") as output_file:
+        output_file.write(contents[start_index:end_index])
+        
+    # Print a message indicating which chunk was written to which file
+    print(f"Wrote chunk {i+1} to file {output_file_name}")
