@@ -1,0 +1,31 @@
+) WAP to demonstrate race condition between two processes.
+
+import os
+import time
+
+# Define a shared variable
+shared_var = 0
+
+def process1():
+    global shared_var
+    for i in range(1000000):
+        shared_var += 1
+
+def process2():
+    global shared_var
+    for i in range(1000000):
+        shared_var += 1
+
+# Create two processes
+pid = os.fork()
+
+if pid == 0:
+    process1()
+else:
+    process2()
+
+# Wait for both processes to finish
+os.wait()
+
+# Print the final value of the shared variable
+print("Final value of shared_var:", shared_var)
