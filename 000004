@@ -1,0 +1,54 @@
+Write a program to create two threads. One thread multiply two numbers stored it in MULTI while the second thread adds two numbers and store this addition in ADC Bath threads should return MULTI and ADD through pthread_ext to main function only
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+int MULTI = 0;
+int ADD = 0;
+
+void *multiply(void *arg) {
+    int a = ((int *)arg)[0];
+    int b = ((int *)arg)[1];
+    MULTI = a * b;
+    pthread_exit(NULL);
+}
+
+void *add(void *arg) {
+    int a = ((int *)arg)[0];
+    int b = ((int *)arg)[1];
+    ADD = a + b;
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t tid1, tid2;
+    int num1, num2;
+    int args[2];
+
+    // get the two numbers from user
+    printf("Enter the first number: ");
+    scanf("%d", &num1);
+    printf("Enter the second number: ");
+    scanf("%d", &num2);
+
+    // create the first thread to multiply the numbers
+    args[0] = num1;
+    args[1] = num2;
+    pthread_create(&tid1, NULL, multiply, args);
+
+    // create the second thread to add the numbers
+    pthread_create(&tid2, NULL, add, args);
+
+    // wait for both threads to finish
+    pthread_join(tid1, NULL);
+    pthread_join(tid2, NULL);
+
+    // print the results
+    printf("Multiplication result: %d\n", MULTI);
+    printf("Addition result: %d\n", ADD);
+
+    return 0;
+}
