@@ -1,0 +1,57 @@
+WAP to create given process hierarchy P1 P2 P3->p4, print process fa and P4 should be an orphan process
+
+#include <stdio.h>
+#include <unistd.h>
+
+int main() {
+    pid_t pid1, pid2, pid3, pid4;
+
+    // create process P1
+    pid1 = getpid();
+    printf("P1 (pid=%d) is the parent process\n", pid1);
+
+    // create process P2
+    pid2 = fork();
+    if (pid2 == 0) {
+        pid2 = getpid();
+        printf("P2 (pid=%d) is the child process of P1 (pid=%d)\n", pid2, pid1);
+
+        // create process P3
+        pid3 = fork();
+        if (pid3 == 0) {
+            pid3 = getpid();
+            printf("P3 (pid=%d) is the child process of P2 (pid=%d)\n", pid3, pid2);
+
+            // create process P4
+            pid4 = fork();
+            if (pid4 == 0) {
+                pid4 = getpid();
+                printf("P4 (pid=%d) is the child process of P3 (pid=%d)\n", pid4, pid3);
+
+                // make P4 an orphan process
+                setsid();
+                printf("P4 (pid=%d) is now an orphan process\n", pid4);
+
+                // wait for 10 seconds to prevent P4 from exiting immediately
+                sleep(10);
+
+                return 0;
+            } else {
+                // wait for P4 to exit
+                wait(NULL);
+            }
+
+            return 0;
+        } else {
+            // wait for P3 to exit
+            wait(NULL);
+        }
+
+        return 0;
+    } else {
+        // wait for P2 to exit
+        wait(NULL);
+    }
+
+    return 0;
+}
