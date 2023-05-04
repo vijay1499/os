@@ -1,0 +1,39 @@
+WAP to create two threads. One will print the numbers from 50 to 1 and the other thread will find whether a number entered by the user is prime or not. 
+
+
+import threading
+
+# Define a function to print the numbers from 50 to 1
+def print_numbers():
+    for i in range(50, 0, -1):
+        print(i)
+
+# Define a function to check whether a number is prime or not
+def is_prime(n):
+    if n <= 1:
+        return False
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+# Get input from the user
+num = int(input("Enter a number: "))
+
+# Create two threads
+t1 = threading.Thread(target=print_numbers)
+t2 = threading.Thread(target=is_prime, args=(num,))
+
+# Start the threads
+t1.start()
+t2.start()
+
+# Wait for both threads to finish
+t1.join()
+t2.join()
+
+# Print the result of the is_prime function
+if t2.result:
+    print(f"{num} is a prime number.")
+else:
+    print(f"{num} is not a prime number.")
