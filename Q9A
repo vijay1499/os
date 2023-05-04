@@ -1,0 +1,31 @@
+ Write a program to create following hierarchy and verify the relationship between the processes. Where process P1 has 2 children P2 and P3.
+ 
+ 
+ #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main()
+{
+    pid_t pid1, pid2, pid3;
+
+    pid1 = getpid();
+    printf("P1: pid=%d, ppid=%d\n", pid1, getppid());
+
+    pid2 = fork();
+    if (pid2 == 0) {
+        printf("P2: pid=%d, ppid=%d\n", getpid(), getppid());
+        exit(0);
+    }
+
+    pid3 = fork();
+    if (pid3 == 0) {
+        printf("P3: pid=%d, ppid=%d\n", getpid(), getppid());
+        exit(0);
+    }
+
+    waitpid(pid2, NULL, 0);
+    waitpid(pid3, NULL, 0);
+
+    return 0;
+}
