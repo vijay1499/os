@@ -1,0 +1,55 @@
+WAP to implement IPC using pipes between parent and child process parent should send "Hello" to child whereas child process sends Thanks to parent process
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+#define BUFFER_SIZE 25
+
+int main() {
+    int pipefd[2]; // pipe file descriptors
+    char buffer[BUFFER_SIZE]; // buffer for pipe read/write
+
+    // create the pipe
+    if (pipe(pipefd) == -1) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
+
+    // fork the child process
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (pid == 0) { // child process
+        close(pipefd[1]); // close write end of the pipe in child process
+
+        // read from pipe
+        int nbytes = read(pipefd[0], buffer, BUFFER_SIZE);
+        printf("Child received: %s\n", buffer);
+
+        // send message to parent
+        char* message = "Thanks";
+        write(pipefd[1], message, strlen(message) + 1);
+
+        close(pipefd[0]); // close read end of the pipe in child process
+        exit(EXIT_SUCCESS);
+    } else { // parent process
+        close(pipefd[0]); // close read end of the pipe in parent process
+
+        // send message to child
+        char* message = "Hello";
+        write(pipefd[1], message, strlen(message) + 1);
+
+        // read from pipe
+        int nbytes = read(pipefd[0], buffer, BUFFER_SIZE);
+        printf("Parent received: %s\n", buffer);
+
+        close(pipefd[1]); // close write end of the pipe in parent process
+        exit(EXIT_SUCCESS);
+    }
+}
