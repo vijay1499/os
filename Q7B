@@ -1,0 +1,20 @@
+WAP using system calls which will read from 10th character to 20th character from a file opened in read only mode
+
+
+import os
+
+# Open the file in read-only mode
+file_path = "example.txt"
+file_descriptor = os.open(file_path, os.O_RDONLY)
+
+# Seek to the 10th character
+os.lseek(file_descriptor, 9, os.SEEK_SET)
+
+# Read the next 11 characters (10th to 20th)
+data = os.read(file_descriptor, 11)
+
+# Close the file descriptor
+os.close(file_descriptor)
+
+# Print the data read from the file
+print(f"Data from 10th to 20th character: {data.decode()}")
