@@ -1,31 +1,58 @@
 ) WAP to demonstrate race condition between two processes.
 
-import os
-import time
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
-# Define a shared variable
-shared_var = 0
+int main() {
+    pid_t pid1, pid2;
+    int status;
 
-def process1():
-    global shared_var
-    for i in range(1000000):
-        shared_var += 1
+    // Fork the first child process
+    pid1 = fork();
+    if (pid1 < 0) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+    else if (pid1 == 0) {
+        // Child process 1
+        FILE* fp = fopen("output.txt", "a");
+        if (fp == NULL) {
+            perror("fopen");
+            exit(EXIT_FAILURE);
+        }
 
-def process2():
-    global shared_var
-    for i in range(1000000):
-        shared_var += 1
+        // Write "Hello from child process 1" to the file
+        fprintf(fp, "Hello from child process 1\n");
+        fclose(fp);
+        exit(EXIT_SUCCESS);
+    }
 
-# Create two processes
-pid = os.fork()
+    // Fork the second child process
+    pid2 = fork();
+    if (pid2 < 0) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+    else if (pid2 == 0) {
+        // Child process 2
+        FILE* fp = fopen("output.txt", "a");
+        if (fp == NULL) {
+            perror("fopen");
+            exit(EXIT_FAILURE);
+        }
 
-if pid == 0:
-    process1()
-else:
-    process2()
+        // Write "Hello from child process 2" to the file
+        fprintf(fp, "Hello from child process 2\n");
+        fclose(fp);
+        exit(EXIT_SUCCESS);
+    }
 
-# Wait for both processes to finish
-os.wait()
+    // Wait for both child processes to finish
+    waitpid(pid1, &status, 0);
+    waitpid(pid2, &status, 0);
 
-# Print the final value of the shared variable
-print("Final value of shared_var:", shared_var)
+    return 0;
+}
+
