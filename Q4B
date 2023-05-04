@@ -1,0 +1,34 @@
+ Write a program using systems for operations on processes to create a hierarchy of processes P1 ? P2 ? P3? P4. Also, print the id and parent id for each process.
+ 
+ import os
+
+# Create the first process P1
+pid_p1 = os.getpid()
+print(f"Process P1 created with PID {pid_p1} and PPID {os.getppid()}")
+
+# Create the second process P2
+pid_p2 = os.fork()
+if pid_p2 == 0:
+    # This is the child process (P2)
+    print(f"Process P2 created with PID {os.getpid()} and PPID {pid_p1}")
+    
+    # Create the third process P3
+    pid_p3 = os.fork()
+    if pid_p3 == 0:
+        # This is the child process (P3)
+        print(f"Process P3 created with PID {os.getpid()} and PPID {os.getppid()}")
+        
+        # Create the fourth process P4
+        pid_p4 = os.fork()
+        if pid_p4 == 0:
+            # This is the child process (P4)
+            print(f"Process P4 created with PID {os.getpid()} and PPID {os.getppid()}")
+        else:
+            # This is the parent process (P3)
+            os.waitpid(pid_p4, 0)
+    else:
+        # This is the parent process (P2)
+        os.waitpid(pid_p3, 0)
+else:
+    # This is the parent process (P1)
+    os.waitpid(pid_p2, 0)
