@@ -1,24 +1,32 @@
  Write a program using system calls to find and print the largest file name(file Size wise) among 3 existing files.
  
  
- import os
+ #include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 
-# Define the file names
-file_names = ["file1.txt", "file2.txt", "file3.txt"]
+int main() {
+    char* filenames[3] = {"file1.txt", "file2.txt", "file3.txt"};
+    struct stat file_stats;
+    long max_size = 0;
+    char* max_filename = NULL;
 
-# Initialize the max file size and max file name
-max_file_size = 0
-max_file_name = ""
+    // Iterate over the filenames array and get the file size for each file
+    for (int i = 0; i < 3; i++) {
+        if (stat(filenames[i], &file_stats) == -1) {
+            perror("stat");
+            exit(EXIT_FAILURE);
+        }
 
-# Loop through the file names
-for file_name in file_names:
-    # Get the file size using os.path.getsize
-    file_size = os.path.getsize(file_name)
-    
-    # If the current file size is larger than the current max file size, update the max file size and name
-    if file_size > max_file_size:
-        max_file_size = file_size
-        max_file_name = file_name
+        // Check if the file size is larger than the current maximum
+        if (file_stats.st_size > max_size) {
+            max_size = file_stats.st_size;
+            max_filename = filenames[i];
+        }
+    }
 
-# Print the max file name and size
-print(f"The largest file is {max_file_name} with size {max_file_size} bytes.")
+    // Print the filename with the largest file size
+    printf("The largest file is %s with size %ld bytes.\n", max_filename, max_size);
+
+    return 0;
+}
