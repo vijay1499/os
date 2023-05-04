@@ -1,0 +1,20 @@
+Write a program using directory system calls to make a directory and create 10 files (file_1.) inside the directory and list the contents of the directory.
+
+
+import os
+
+# Create a directory named "my_directory"
+os.mkdir("my_directory")
+
+# Loop through a range of 1 to 10 to create 10 files with names file_1.txt, file_2.txt, ..., file_10.txt
+for i in range(1, 11):
+    # Create a file name with the format "file_i.txt"
+    file_name = f"my_directory/file_{i}.txt"
+    
+    # Create a new file with the file name
+    open(file_name, "w").close()
+
+# List the contents of the directory
+print("Contents of the directory:")
+for file_name in os.listdir("my_directory"):
+    print(file_name)
