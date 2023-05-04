@@ -1,0 +1,104 @@
+Write a program using directory and file manipulation system calls to copy the contents of one directory in a newly created directory, and delete the original directory.
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <string.h>
+
+void copy_directory(const char *src_dir, const char *dest_dir)
+{
+    DIR *dirp;
+    struct dirent *dp;
+    struct stat src_stat;
+    char src_path[PATH_MAX];
+    char dest_path[PATH_MAX];
+    int src_fd, dest_fd;
+    ssize_t n;
+    char buf[BUFSIZ];
+
+    // Open the source directory
+    dirp = opendir(src_dir);
+    if (dirp == NULL) {
+        perror("Error opening source directory");
+        exit(1);
+    }
+
+    // Create the destination directory
+    if (mkdir(dest_dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+        perror("Error creating destination directory");
+        exit(1);
+    }
+
+    // Traverse the source directory and copy each file to the destination directory
+    while ((dp = readdir(dirp)) != NULL) {
+        // Construct the source and destination paths
+        snprintf(src_path, sizeof(src_path), "%s/%s", src_dir, dp->d_name);
+        snprintf(dest_path, sizeof(dest_path), "%s/%s", dest_dir, dp->d_name);
+
+        // Get the file status for the source file
+        if (stat(src_path, &src_stat) != 0) {
+            perror("Error getting file status");
+            exit(1);
+        }
+
+        if (S_ISDIR(src_stat.st_mode)) {
+            // The source file is a directory; recursively copy it to the destination directory
+            if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0) {
+                // Skip the "." and ".." directories
+                continue;
+            }
+            copy_directory(src_path, dest_path);
+        } else {
+            // The source file is a regular file; copy it to the destination directory
+            src_fd = open(src_path, O_RDONLY);
+            if (src_fd == -1) {
+                perror("Error opening source file");
+                exit(1);
+            }
+
+            dest_fd = open(dest_path, O_WRONLY | O_CREAT | O_TRUNC, src_stat.st_mode);
+            if (dest_fd == -1) {
+                perror("Error creating destination file");
+                exit(1);
+            }
+
+            while ((n = read(src_fd, buf, BUFSIZ)) > 0) {
+                if (write(dest_fd, buf, n) != n) {
+                    perror("Error writing to destination file");
+                    exit(1);
+                }
+            }
+
+            close(src_fd);
+            close(dest_fd);
+        }
+    }
+
+    closedir(dirp);
+
+    // Delete the original directory
+    if (rmdir(src_dir) != 0) {
+        perror("Error deleting source directory");
+        exit(1);
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <source_directory> <destination_directory>\n", argv[0]);
+        exit(1);
+    }
+
+    copy_directory(argv[1], argv[2]);
+
+    printf("Directory copied successfully!\n");
+
+    return 0;
+}
