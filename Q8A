@@ -1,0 +1,41 @@
+WAP using system calls which will read from 10th character to 15th character from a file opened in read only mode
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main()
+{
+    int fd = open("example.txt", O_RDONLY);
+
+    if (fd < 0) {
+        perror("Failed to open file");
+        exit(1);
+    }
+
+    char buffer[7];
+
+    if (lseek(fd, 9, SEEK_SET) < 0) {
+        perror("Failed to seek to position");
+        close(fd);
+        exit(1);
+    }
+
+    ssize_t bytes_read = read(fd, buffer, 6);
+
+    if (bytes_read < 0) {
+        perror("Failed to read file");
+        close(fd);
+        exit(1);
+    }
+
+    buffer[6] = '\0';
+
+    printf("Data from 10th to 15th character: %s\n", buffer);
+
+    close(fd);
+
+    return 0;
+}
